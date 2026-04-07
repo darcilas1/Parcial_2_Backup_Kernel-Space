@@ -119,7 +119,7 @@ Contiene las dos implementaciones:
 
 ---
 
-## ⚙️ Requisitos Previos
+## Requisitos Previos
 
 Este proyecto usa **system calls de Linux/POSIX** y debe compilarse y ejecutarse en un entorno Linux. En Windows, usar **WSL** (Windows Subsystem for Linux).
 
@@ -143,7 +143,7 @@ wsl --list --verbose
 
 ---
 
-## 🔧 Instalación y Compilación
+## Instalación y Compilación
 
 ### 1. Abrir una terminal WSL y navegar al proyecto
 
@@ -179,7 +179,7 @@ ls -la backup_smart
 
 ---
 
-## 🚀 Cómo Ejecutar
+## Cómo Ejecutar
 
 ### Modo Backup (`-b`)
 
@@ -341,7 +341,7 @@ Implementación equivalente usando `stdio.h`. La diferencia clave es el **buffer
 
 ---
 
-## 🛡️ Manejo de Errores
+## Manejo de Errores
 
 El sistema implementa manejo exhaustivo de errores usando `errno`, los mismos códigos que usa el kernel de Linux:
 
@@ -357,7 +357,7 @@ El sistema implementa manejo exhaustivo de errores usando `errno`, los mismos c�
 
 ---
 
-## 🛠️ Targets del Makefile
+## Targets del Makefile
 
 ```bash
 make all          # Compila backup_smart (proyecto principal)
@@ -372,7 +372,7 @@ make help         # Muestra ayuda del Makefile
 
 ---
 
-## 📚 Código Base del Profesor
+## Código Base del Profesor
 
 El archivo `backup.c` es el código base original proporcionado por el profesor. Implementa copia de archivos y directorios recursiva usando system calls. Se conserva como referencia y se puede compilar de forma independiente:
 
@@ -391,7 +391,7 @@ El proyecto `backup_smart` (este proyecto) es una versión extendida y modulariz
 
 ---
 
-## 📄 Entregables
+## Entregables
 
 | Archivo | Descripción |
 |---|---|
@@ -416,7 +416,7 @@ Instalar extensión `Markdown PDF` → clic derecho sobre `reporte_backup.md` �
 
 ---
 
-## 🔗 Referencias
+## Referencias
 
 - Código base del profesor: https://github.com/evalenciEAFIT/courses/tree/main/SO_XV6/tema/backup
 - Material de apoyo: https://drive.google.com/drive/folders/1m8dM3hU7BUP2Mt0nYIK9VtySzbmymSLw
