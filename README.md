@@ -114,7 +114,7 @@ Contiene las dos implementaciones:
 
 #### `main.c` — Interfaz de usuario
 - Modo `-b src dest`: copia operacional + comparación inmediata con stdio
-- Modo `--benchmark`: genera archivos de 1KB/1MB/10MB/50MB y muestra tabla comparativa
+- Modo `--benchmark`: genera archivos de 1KB/1MB/10MB/1GB y muestra tabla comparativa
 - Modo `-h`: manual de uso
 
 ---
@@ -227,7 +227,7 @@ Copia un archivo usando `sys_smart_copy` (system calls directas), y también gen
 
 ### Modo Benchmark (`--benchmark`)
 
-Ejecuta una comparativa de rendimiento completa entre `sys_smart_copy` y `lib_smart_copy` con 4 tamaños de archivo (1KB, 1MB, 10MB, 50MB) y 3 corridas por prueba.
+Ejecuta una comparativa de rendimiento completa entre `sys_smart_copy` y `lib_smart_copy` con 4 tamaños de archivo (1 KB, 1 MB, 10 MB, 1 GB) y 3 corridas por prueba.
 
 ```bash
 ./backup_smart --benchmark
@@ -239,23 +239,21 @@ O directamente desde Make:
 make benchmark
 ```
 
-**Salida de ejemplo:**
+**Salida real del benchmark (3 corridas, buffer 4 KB):**
 ```
-  ╔══════════════════════════════════════════════════════════════════╗
-  ║                     TABLA COMPARATIVA DE RENDIMIENTO           ║
-  ║           sys_smart_copy (syscalls) vs lib_smart_copy (stdio)  ║
-  ╚══════════════════════════════════════════════════════════════════╝
+  TABLA COMPARATIVA DE RENDIMIENTO
+  sys_smart_copy (syscalls) vs lib_smart_copy (stdio)
 
-  +--------+------------------------------------------+------------------------------------------+
-  |        |        sys_smart_copy (syscalls)         |          lib_smart_copy (stdio)          |
-  | Tamaño +-----------+----------+--------------------+-----------+----------+------------------+
-  |        |  Método   | T.Prom.  |  MB/s  | Llam.I/O |  Método   | T.Prom.  |  MB/s  | Llam.I/O|
-  +--------+------------------+-----------+----------+-----------+-----------+----------+----------+
-  |   1 KB | syscall    0.052 ms |    18.3 |        2 |    stdio    0.031 ms |    30.8 |        2 |
-  |   1 MB | syscall    3.241 ms |   309.2 |      512 |    stdio    2.118 ms |   473.1 |      256 |
-  |  10 MB | syscall   24.670 ms |   406.1 |     5120 |    stdio   18.340 ms |   546.3 |     2560 |
-  |  50 MB | syscall  118.250 ms |   423.7 |    25600 |    stdio  102.880 ms |   486.9 |    12800 |
-  +--------+------------------+-----------+----------+-----------+-----------+----------+----------+
+  +--------+--------------------+------------------------------------------+------------------------------------------+
+  |        |  sys_smart_copy (syscalls)                |  lib_smart_copy (stdio)                  |
+  | Tamaño +----------+----------+--------+-----------+----------+----------+--------+-----------+
+  |        |  Método  | T.Prom.  |  MB/s  | Llam.I/O  |  Método  | T.Prom.  |  MB/s  | Llam.I/O  |
+  +--------+----------+----------+--------+-----------+----------+----------+--------+-----------+
+  |   1 KB | syscall  |   4.314 ms |   0.2 |         2 | stdio    |   6.193 ms |   0.2 |         2 |
+  |   1 MB | syscall  |  88.010 ms |  11.4 |       512 | stdio    | 136.285 ms |   7.3 |       512 |
+  |  10 MB | syscall  | 753.071 ms |  13.3 |      5120 | stdio    |1315.643 ms |   7.6 |      5120 |
+  | 1024 MB| syscall  |249221.126 ms|   4.1 |    524288 | stdio    |96586.439 ms|  10.6 |    524288 |
+  +--------+----------+----------+--------+-----------+----------+----------+--------+-----------+
 ```
 
 ---
@@ -288,7 +286,7 @@ make test
 
 ---
 
-##  Descripción Técnica
+## 🔬 Descripción Técnica
 
 ### `sys_smart_copy` — Capa Kernel
 
@@ -332,12 +330,14 @@ Implementación equivalente usando `stdio.h`. La diferencia clave es el **buffer
 
 ### Comparativa de Rendimiento
 
-| Escenario | Ganador | Razón |
-|---|---|---|
-| Archivos pequeños (< 8 KB) | `lib_smart_copy` | Buffer de `FILE*` evita syscalls extra |
-| Archivos medianos (1–100 MB) | `lib_smart_copy` leve ventaja | Menos context switches por buffer interno |
-| Archivos grandes (> 100 MB) | Similares | Cuello de botella: disco, no context switch |
-| Control total del sistema | `sys_smart_copy` | Acceso directo a metadatos, permisos, page cache |
+| Escenario | Ganador | Resultado real | Razón |
+|---|---|---|---|
+| Archivos ≤ 1 KB | Indiferente | ~0.2 MB/s ambos | Ruido de medición domina; mismo N° de syscalls |
+| Archivos medianos (1–10 MB) | **`sys_smart_copy`** ✓ | 1.55–1.75× más rápido | Evita copia intermedia del buffer interno de `FILE*` |
+| Archivos grandes (≥ 1 GB) | **`lib_smart_copy`** ✓ | 10.6 vs 4.1 MB/s | Presión sobre page cache + `fsync()` penaliza syscalls |
+| Control total del sistema | `sys_smart_copy` | — | Acceso directo a metadatos del kernel vía `stat/errno` |
+
+> ⚠️ **Resultado contraintuitivo en 1 GB:** `lib_smart_copy` superó a `sys_smart_copy` por ~2.5×. Esto se atribuye a la saturación del page cache en WSL2 y al overhead del `fsync()` final al escribir 1 GB a disco.
 
 ---
 
@@ -399,20 +399,6 @@ El proyecto `backup_smart` (este proyecto) es una versión extendida y modulariz
 | `backup_engine.c` | Lógica central de la copia (simulando comportamiento del kernel) |
 | `main.c` | Interfaz de usuario con rutas origen/destino y pruebas de tiempo |
 | `reporte_backup.md` | Informe técnico — convertir a PDF para la entrega final |
-
-### Exportar reporte a PDF
-
-**Opción 1 — Pandoc (recomendado en WSL):**
-```bash
-# Instalar pandoc
-sudo apt install -y pandoc texlive-latex-base texlive-fonts-recommended
-
-# Exportar a PDF
-pandoc reporte_backup.md -o reporte.pdf --pdf-engine=pdflatex
-```
-
-**Opción 2 — VS Code:**  
-Instalar extensión `Markdown PDF` → clic derecho sobre `reporte_backup.md` → *Markdown PDF: Export (pdf)*
 
 ---
 
