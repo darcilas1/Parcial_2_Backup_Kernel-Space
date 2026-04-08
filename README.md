@@ -420,6 +420,3 @@ Instalar extensión `Markdown PDF` → clic derecho sobre `reporte_backup.md` �
 
 - Código base del profesor: https://github.com/evalenciEAFIT/courses/tree/main/SO_XV6/tema/backup
 - Material de apoyo: https://drive.google.com/drive/folders/1m8dM3hU7BUP2Mt0nYIK9VtySzbmymSLw
-- `man 2 open` · `man 2 read` · `man 2 write` · `man 2 stat` · `man 2 fsync`
-- *Advanced Programming in the UNIX Environment* — W. R. Stevens
-- *Linux Kernel Development* — Robert Love
