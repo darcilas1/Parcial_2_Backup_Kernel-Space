@@ -4,7 +4,7 @@ Sistema de respaldo de archivos implementado en C que opera a nivel de **kernel-
 
 **Curso:** Sistemas Operativos  
 **Institución:** Universidad EAFIT — 2026  
-**Autores:** [Nombres del equipo]
+**Autores:** Jeronimo Contreras, Juan Esteban Peña y Daniel Arcila
 
 ---
 
@@ -288,7 +288,7 @@ make test
 
 ---
 
-## 🔬 Descripción Técnica
+##  Descripción Técnica
 
 ### `sys_smart_copy` — Capa Kernel
 
