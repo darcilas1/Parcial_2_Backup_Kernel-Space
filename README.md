@@ -286,7 +286,7 @@ make test
 
 ---
 
-## 🔬 Descripción Técnica
+##  Descripción Técnica
 
 ### `sys_smart_copy` — Capa Kernel
 
@@ -337,7 +337,7 @@ Implementación equivalente usando `stdio.h`. La diferencia clave es el **buffer
 | Archivos grandes (≥ 1 GB) | **`lib_smart_copy`** ✓ | 10.6 vs 4.1 MB/s | Presión sobre page cache + `fsync()` penaliza syscalls |
 | Control total del sistema | `sys_smart_copy` | — | Acceso directo a metadatos del kernel vía `stat/errno` |
 
-> ⚠️ **Resultado contraintuitivo en 1 GB:** `lib_smart_copy` superó a `sys_smart_copy` por ~2.5×. Esto se atribuye a la saturación del page cache en WSL2 y al overhead del `fsync()` final al escribir 1 GB a disco.
+>  **Resultado contraintuitivo en 1 GB:** `lib_smart_copy` superó a `sys_smart_copy` por ~2.5×. Esto se atribuye a la saturación del page cache en WSL2 y al overhead del `fsync()` final al escribir 1 GB a disco.
 
 ---
 
